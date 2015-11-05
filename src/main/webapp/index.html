@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- 3rd party -->
+  <script src="sockjs.min.js"></script>
+  <script src="stomp.min.js"></script>
+
+  <!-- application -->
+  <script type="text/javascript">
+
+  var stompClient = null;
+  var uniqueId = makeid();
+
+  var connectStomp = {
+
+    connect: function(){
+      var socket = new SockJS('/spring-websocket-stomp-apollo/chat');
+      stompClient = Stomp.over(socket);
+      stompClient.connect("guest", "guest", function() {
+        alert("connected!");
+
+        stompClient.subscribe('/topic/broadcast', function(message){
+          alert(JSON.parse(message.body).content);
+        });
+        //var uniqueId = document.getElementById('uniqueid').value
+
+        stompClient.subscribe('/queue/message-' + uniqueId, function(message){
+          alert(JSON.parse(message.body).content);
+        });
+      })
+    },
+
+    send: function(){
+      //var uniqueId = document.getElementById('uniqueid').value
+
+      var headers = {
+        'client-id': uniqueId
+      };
+      stompClient.send("/app/message", headers, JSON.stringify({ "subject": "Joe", "message" : "Ni Hao"}));
+    },
+
+    broadcast: function(){
+      //var uniqueId = document.getElementById('uniqueid').value
+
+      var headers = {
+        'client-id': uniqueId
+      };
+      stompClient.send("/app/broadcast", headers, JSON.stringify({ "subject": "Joe", "message" : "Ni Hao"}));
+    }
+  }
+
+  function makeid()
+  {
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+      for( var i=0; i < 5; i++ )
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
+  }
+
+  <!--// function to send message-->
+  <!--function send() {-->
+
+  <!--var headers = {-->
+  <!--'client-id': 'my-client-id'-->
+  <!--};-->
+  <!--stompClient.send("/app/message", headers, JSON.stringify({ "subject": "Joe", "message" : "Ni Hao"}));-->
+  <!--}-->
+
+  </script>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<input id="uniqueid"></input>
+<br>
+<button id="connect" onclick="connectStomp.connect();">Connect</button>
+<br>
+<button id="send" onclick="connectStomp.send();">Send to Others</button>
+<br>
+<button id="broadcast" onclick="connectStomp.broadcast();">Broadcast</button>
+</body>
