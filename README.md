@@ -33,5 +33,32 @@ Sample Spring 4 WebSocket over STOMP with Apollo Full Feature Broker Integration
     }
 ```
 
+### Sample Websocket-shapr STOMP Client Code
+```csharp
+            using (var ws = new WebSocket("ws://localhost:8080/spring-websocket-stomp-apollo/chat/websocket"))
+            {
+                ws.OnMessage += Ws_OnMessage;
+                ws.OnOpen += Ws_OnOpen;
+                ws.OnError += Ws_OnError;
+                ws.Connect();
+                Thread.Sleep(1000);
+
+                StompMessageSerializer serializer = new StompMessageSerializer();
+
+                var connect = new StompMessage("CONNECT");
+                connect["accept-version"] = "1.2";
+                connect["host"] = "";
+                ws.Send(serializer.Serialize(connect));
+
+                Thread.Sleep(1000);
+
+                var sub = new StompMessage("SUBSCRIBE");
+                sub["id"] = "sub-999";
+                sub["destination"] = "/topic/broadcast";
+                ws.Send(serializer.Serialize(sub));
+
+                Console.ReadKey(true);
+            }
+```
 ### Reference GIT Project
 https://github.com/rstoyanchev/spring-websocket-portfolio
